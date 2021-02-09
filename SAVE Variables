@@ -1,5 +1,8 @@
 library(dplyr)
 
+#Select only VA ecmo
+ECMOdata = filter(ECMOdata, ECMOtype == "Veno-Arterial" | ECMOtypeOther == "V-VA")
+
 
 #extract all variables of interest
 table1 = select(ECMO_final, AGE,
