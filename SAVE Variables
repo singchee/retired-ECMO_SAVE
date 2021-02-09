@@ -1,16 +1,36 @@
 library(dplyr)
 
 #extract all variables of interest
+#need to reprocess APD and ecmo weights- coalesce
+table1 = select(*, AGE,
+                    Myocarditis,
+                    CardDysrhythmias,
+                    HeartLungTransplant,
+                    Congheartdisease,
+                    weight,
+                    Systolicbp,
+                    Diastolicbp.
+                    CardiacarrestpriorECMO,
+                    Peakinsppressure,
+                    invventpriorECMO,
+                    ARF,
+                    CHR_REN,
+                    ECMOBicarb,
+                    NeuroInfo,
+                    Bilirubin,
+                    ALT,
+                    BILI_ANZ,
+                    CHR_LIV,
+                    ICU_OUTCM
+                    HOSP_OUTCM)
+                    
 
-table1 = select(*, AGE, CHR_LIV, IMMUNDIS, IMMUNRX, AIDS, HEPFAIL, LYMPHOMA, METAST, LEUKAEM, IMMUNSUP, CIRRHOS, AP3DIAG, AP3_SUBCODE, PrimaryDiagnosis, PrimaryOther, Otherdiagnosis1, Otherdiagnosis2, ICU_OUTCM, HOSP_OUTCM,ECMOtype, invventpriorECMO, Viralpneumonia, Bacterialpneumonia, Asthma, Trauma, Aspirationpneumonitis, NeuroInfo, Neuromuscularblocking, Inhalednitricoxide, Bicarbonateinfusion, CardiacarrestpriorECMO, ECMOPaCO2,Peakinsppressure)
 
 #GENERATE EXTRA VARIABLES
 
 #####GENERATE SAVE CATEGORIES#
 table1$myocarditis = ifelse(table1$Myocarditis = "Yes", 1, 0)
 table1$VFVT = ifelse(table1$CardDysrhythmias = "Yes", 1, 0)
-table1$VFVT = ifelse(table1$CardDysrhythmias = "Yes", 1, 0)
-table1$HeartLungTpt = ifelse(table1$HeartLungTransplant = "Yes", 1, 0)
 table1$HeartLungTpt = ifelse(table1$HeartLungTransplant = "Yes", 1, 0)
 table1$CongHeart = ifelse(table1$Congheartdisease = "Yes", 1, 0)
 
@@ -19,7 +39,7 @@ table1$CongHeart = ifelse(table1$Congheartdisease = "Yes", 1, 0)
 #Age categories
 table1$AgeCat = cut(table1$ECMOweight, breaks = c(0, 39, 53, 63, 999), labels = c(1,2,3,4), include.lowest = TRUE)
 
-#Weight category - coalesce
+#Weight category 
 table1$weight = cut(table1$APD_weight, breaks = c(0, 65, 90, 999), labels = c(1,2,3), include.lowest = TRUE)
 
 #Pulse pressure
@@ -28,13 +48,13 @@ table1$Diastolicbp=as.numeric(table1$Diastolicbp)
 table1$pulsepresscat = ifelse((table1$Systolicbp - table1$Diastolicbp)<=20, "1", "0")
 
 #Diastolic pressure
-table1$dbpcat = ifelse(able1$Diastolicbp >=20, "1", "0")
+table1$dbpcat = ifelse(able1$Diastolicbp >=40, "1", "0")
 
 #Cardiac Arrest before ECMO
 table1$CACat=  ifelse(table1$CardiacarrestpriorECMO == "Yes",  1, 0)
 
 #Peak insp pressure category
-table1$PIPCat =  ifelse(table1$Peakinsppressure >= 42,  1, 0)
+table1$PIPCat =  ifelse(table1$Peakinsppressure <=20,  1, 0)
 
 #Ventilated before ECMO
 #Need to convert from char to numeric
@@ -45,7 +65,7 @@ table1$Intubation = cut(table1$invventpriorECMO, breaks = c(0,11,30,9990) , labe
 table1%ARF = ifelse(table1$ARF == "1" | (table1$CHR_REN == "0" & table1$Creatinine >=133),  1, 0)
 
 #Chronic renal
-table1$CHR_REN=  ifelse(table1$CHR_REN == "1",  1, 0)
+table1$CRF=  ifelse(table1$CHR_REN == "1",  1, 0)
 
 #Lowest HCO3 before ECMO
 table1$BicarbCat=  ifelse(table1$ECMOBicarb <= 15,  1, 0)
@@ -61,19 +81,22 @@ table1$ICUSurvival = ifelse(table1$ICU_OUTCM == "2", 0, 1)
 table1$HosSurvival = ifelse(table1$HOSP_OUTCM == "2", 0, 1)
 
 ##ASSIGN SCORES FOR EACH VARIABLE
-
-table1$AgeScore = recode(table1$AgeCat, "1"=0, "2"=-2, "3"=-3)
-table1$ImmuComprScore = recode(table1$ImmuComprCat, "0" =0, "1"=-2)
-table1$InVentScore = recode(table1$InVentCat, "1"=3, "2"=2, "3"=0)
-table1$AcRespGpScore = recode(table1$AcRespDgGrp, "1"=2, "2"=3, "3"=8, "4"=3, "5"=4, "6"=1, "7"=0)
-table1$CNSDysfScore = recode(table1$CNSDysfCat, "0"=0,"1"=-6)
-table1$NonPulmInfScore = recode(table1$NonPulmInfCat, "0"=0,"1"=-2)
-table1$NMBScore = recode(table1$NMBCat, "0"=0,"1"=1)
-table1$NOScore = recode(table1$NOCat, "0"=0,"1"=-1)
-table1$BicarbScore = recode(table1$BicarbCat, "0"=0,"1"=-1)
-table1$CAScore = recode(table1$CACat, "0"=0,"1"=-2)
-table1$CO2Score = recode(table1$CO2Cat, "0"=0,"1"=-1)
-table1$PIPScore = recode(table1$PIPCat, "0"=0,"1"=-1)
+table1$Myocardscore =  recode(table1$Myocarditis, "1" = 3, 0)
+table1$VTVFscore =  recode(table1$VFVT, "1" = 2, 0)
+table1$Heartlungtptscore =  recode(table1$HeartLungTpt, "1" = 3, 0)
+table1$Congheartscore =  recode(table1$CongHeart, "1" = -3, 0)
+table1$Agescore = recode(table1$AgeCat, "1"=7, "2"=4, "3"=3, "4"=0)
+table1$Weightscore = recode(table1$Weight, "1" =1, "2"=2, "3"=0)
+table1$Liverscore = recode(table1$liver, "0" = 0, "1"=-3,)
+table1$CNSscore = recode(table1$CNSDysfCat, "0"=0,"1"=-3)
+table1%ARFscore = recode(table1%ARF, "0"=0, "1"=-3)
+table1$CRFscore = recode(table1$CRF, "0"=0, "1"=-6)
+table1$Intubscore = recode(table1$Intubation, "1"=0, "2"=-2, "3"=-4)
+table1$PIPscore = recode(table1$PIPCat, "0"=0,"1"=3)
+table1$CAscore = recode(table1$CACat, "0"=0,"1"=-2)
+table1$Dbpscore = recode(table1$CACat, "0"=0,"1"=-2)
+table1$Pulseprscore=recode(table1$pulsepresscat, "0"=0,"1"=-2)
+table1$Bicarbscore=recode(table1$BicarbCat, "0"=0,"1"=-3)
 
 
 
@@ -85,17 +108,20 @@ table1$SAVEscore= with(table1, rowSums(cbind(Myocardscore,
                                              Agescore,
                                              Weightscore,
                                              Pulseprscore,
-                                             Diasbpscore,
+                                             Dbpscore,
                                              CAscore,
                                              PIPscore,
-                                             Intubationscore,
+                                             Intubscore,
                                              ARFscore,
-                                             CKDscore,
-                                             HCO3score,                                            
+                                             CRFscore,
+                                             Bicarbscore,                                            
                                              Liverscore, 
-                                             CNSscore) ))
+                                             CNSscore) )) - 6
 
 
+
+
+#RESP CODE BELOW#
 
 
 #ASSIGN COEFFICIENTS FOR EACH VARIABLE
