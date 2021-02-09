@@ -1,10 +1,8 @@
 library(dplyr)
-#need to reprocess APD and ecmo weights
-APD$APDweight = APD$weight
-APD$ECMOweight = ECMO$weight
+
 
 #extract all variables of interest
-table1 = select(*, AGE,
+table1 = select(ECMO_final, AGE,
                     Myocarditis,
                     CardDysrhythmias,
                     HeartLungTransplant,
@@ -12,7 +10,7 @@ table1 = select(*, AGE,
                     APDweight,
                     ECMOweight,
                     Systolicbp,
-                    Diastolicbp.
+                    Diastolicbp,
                     CardiacarrestpriorECMO,
                     Peakinsppressure,
                     invventpriorECMO,
@@ -24,7 +22,7 @@ table1 = select(*, AGE,
                     ALT,
                     BILI_ANZ,
                     CHR_LIV,
-                    ICU_OUTCM
+                    ICU_OUTCM,
                     HOSP_OUTCM)
                     
 
