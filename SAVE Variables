@@ -1,13 +1,16 @@
 library(dplyr)
+#need to reprocess APD and ecmo weights
+APD$APDweight = APD$weight
+APD$ECMOweight = ECMO$weight
 
 #extract all variables of interest
-#need to reprocess APD and ecmo weights- coalesce
 table1 = select(*, AGE,
                     Myocarditis,
                     CardDysrhythmias,
                     HeartLungTransplant,
                     Congheartdisease,
-                    weight,
+                    APDweight,
+                    ECMOweight,
                     Systolicbp,
                     Diastolicbp.
                     CardiacarrestpriorECMO,
@@ -37,10 +40,11 @@ table1$CongHeart = ifelse(table1$Congheartdisease = "Yes", 1, 0)
 #ignore "Other" category as score is 0
 
 #Age categories
-table1$AgeCat = cut(table1$ECMOweight, breaks = c(0, 39, 53, 63, 999), labels = c(1,2,3,4), include.lowest = TRUE)
+table1$AgeCat = cut(table1$AGE, breaks = c(0, 39, 53, 63, 999), labels = c(1,2,3,4), include.lowest = TRUE)
 
 #Weight category 
-table1$weight = cut(table1$APD_weight, breaks = c(0, 65, 90, 999), labels = c(1,2,3), include.lowest = TRUE)
+table1$weight = coalesce(table1$APDweight, table1$ECMOweight)
+table1$weightcat = cut(table1$APDweight, breaks = c(0, 65, 90, 999), labels = c(1,2,3), include.lowest = TRUE)
 
 #Pulse pressure
 table1$Systolicbp=as.numeric(table1$Systolicbp)
