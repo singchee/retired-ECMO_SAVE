@@ -142,9 +142,13 @@ table1$CRFcoeff = recode(table1$CRF, "0"=0, "1"=-0.872)
 table1$Intubcoeff = recode(table1$Intubation, "1"=0, "2"=-0.31, "3"=-0.591)
 table1$PIPcoeff = recode(table1$PIPCat, "0"=0,"1"=0.381)
 table1$CAscoeff = recode(table1$CACat, "0"=0,"1"=-0.29)
-table1$Dbpcoeff = recode(table1$CACat, "0"=0,"1"=-2)
+table1$Dbpcoeff = recode(table1$CACat, "0"=0,"1"=0.348)
 table1$Pulseprcoeff=recode(table1$pulsepresscat, "0"=0,"1"=-0.277)
-table1$Bicarbscore=recode(table1$BicarbCat, "0"=0,"1"=-0.364)
+table1$Bicarbcoeff=recode(table1$BicarbCat, "0"=0,"1"=-0.364)
+
+
+#replace NA with 0
+table1[, 61:76][is.na(table1[, 61:76])] <- 0
 
 
 ##CALCULATE LOGIT
